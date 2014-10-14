@@ -87,7 +87,7 @@ The processor is resonsible for -
 
 
 <figure role="group">
-<img src="images/MDProcessor.png" alt="MDProcessor" style="width: 800px; height: 500px;" title="MDProcessor"/>
+<img src="images/MDProcessor.jpg" alt="MDProcessor" style="width: 800px; height: 500px;" title="MDProcessor"/>
 <figcaption>Fig 1. MDProcessor</figcaption>
 </figure>
 
