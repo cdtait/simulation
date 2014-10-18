@@ -36,6 +36,8 @@ struct BookMap {
 		return askLevels;
 	}
 
+	void clear();
+
 	// Bid levels as a map
     BidPriceLevels bidLevels;
     //Ask levels as a map
@@ -104,6 +106,11 @@ PriceLevelKey BookMap::get_top_ask() {
 	else {
 		return PriceLevelKey();
 	}
+}
+
+void BookMap::clear() {
+	bidLevels.clear();
+	askLevels.clear();
 }
 
 #endif

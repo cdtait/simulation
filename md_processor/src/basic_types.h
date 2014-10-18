@@ -82,6 +82,8 @@ typedef struct {
 	PriceLevelKey price;
 } Order;
 
+typedef std::vector<Order> Orders;
+
 /**
  *  @brief The trade properties extracted from event
  *
@@ -91,6 +93,8 @@ typedef struct {
 	QuantityValueType quantity;
 	PriceLevelKey price;
 } Trade;
+
+typedef std::vector<Trade> Trades;
 
 /**
  *  @brief Pending match order

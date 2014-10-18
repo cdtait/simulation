@@ -114,6 +114,48 @@ public:
 	}
 
 	/**
+	 *  @brief  Handle a snapshot.
+	 *  @param  orders that make up the snapshot
+	 *
+	 */
+	void snapshot_orders(Orders && orders) {
+		levels.clear();
+
+		for (auto order: orders) {
+			// Choose a side
+			if (order.side == Side::Bid) {
+				// Add bid order
+				add_side(order, levels.bidLevels);
+			} else if (order.side == Side::Ask) {
+				// Add ask order
+				add_side(order, levels.askLevels);
+			}
+		}
+	}
+
+	/**
+	 *  @brief  Handle a snapshot.
+	 *  @param  orders that make up the snapshot
+	 *
+	 */
+	bool snapshot_trades(Trades && trades) {
+		for (auto trade: trades) {
+			if (trade.price != total_traded.price) {
+				// Reset the price
+				total_traded.total.clear();
+				total_traded.price = trade.price;
+				total_traded.side = trade.side;
+			}
+
+			// Add an addition quantity
+			total_traded.total.push_back(trade.quantity);
+		}
+
+		return !trades.empty();
+	}
+
+
+	/**
 	 *  @brief  Get the top bid from underlying Container book data structure.
 	 *  @return price of top bid
 	 *
@@ -426,9 +468,9 @@ private:
 	        BookData<n> book=book_data();
 	        book.event=Event::Trade;
 	        // The last trade and its traded quantity
-	        book.last_trade={total_traded.side,total_traded.price,total_traded.total.back()};
+	        book.last_trade={total_traded.side,total_traded.total.back(),total_traded.price};
 	        // Sum of all quantities at this price
-	        book.total_traded_quantity={total_traded.side,total_traded.price,sum(total_traded.total)};
+	        book.total_traded_quantity={total_traded.side,sum(total_traded.total),total_traded.price};
 
 	    	return book;
 	    }

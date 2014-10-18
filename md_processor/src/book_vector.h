@@ -143,6 +143,18 @@ struct BookVector {
 				throw std::out_of_range("Order id:"+orderid);
 			}
 	    }
+
+		/**
+		 *  @brief  Clear the underlying orderbook data structure
+		 *
+		 *  This looks at the orders_index to see if empty
+		 *
+		 */
+		void clear() {
+			orders.clear();
+			order_index.clear();
+		}
+
 	} Orders;
 
 	/**
@@ -258,6 +270,17 @@ struct BookVector {
 			}
 	    }
 
+		/**
+		 *  @brief  Clear the underlying orderbook data structure
+		 *
+		 *  This looks at the orders_index to see if empty
+		 *
+		 */
+		void clear() {
+			levels.clear();
+			level_index.clear();
+		}
+
 	} PriceLevels;
 
 	/**
@@ -304,6 +327,8 @@ struct BookVector {
 
 	SortedBids & get_sorted_bids();
 	SortedAsks & get_sorted_asks();
+
+	void clear();
 
 	// Bid levels as a vector of custom PriceLevel types
     BidPriceLevels bidLevels;
@@ -366,6 +391,13 @@ inline BookVector::SortedAsks & BookVector::get_sorted_asks() {
 	sorted_ask(*this,sortedAskLevels);
 	return sortedAskLevels;
 }
+
+void BookVector::clear() {
+	bidLevels.clear();
+	askLevels.clear();
+}
+
+
 /**
  *
  * The following code is use to vectorize the sums of quantities and adds further to the experiment

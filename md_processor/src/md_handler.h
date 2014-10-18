@@ -16,7 +16,7 @@
    *  is sent to the order book
    *
    */
-template <typename Parser=type_parser, typename Container=BookMap>
+template <typename Parser=json_parser, typename Container=BookMap>
 class md_handler {
 public:
     void stop() {
@@ -37,42 +37,59 @@ public:
      * @param iter
      */
     template <typename Iterator>
-    void processMessage(Iterator& message_iter,const Iterator& end) {
+    void process_message(Iterator& message_iter,const Iterator& end) {
         Event event = Parser::get_event(message_iter,end);
 
-			switch (event) {
-			default:
-				break;
-			case Event::Add:
-				ob.add(Parser::get_order(message_iter,end));
-				if (publisher.get())
-					publisher->offer(ob.mid_data());
-				break;
-			case Event::Modify:
-				ob.modify(Parser::get_order(message_iter,end));
-				if (publisher.get())
-					publisher->offer(ob.mid_data());
-				break;
-			case Event::Cancel:
-				ob.cancel(Parser::get_order(message_iter,end));
-				if (publisher.get())
-					publisher->offer(ob.mid_data());
-				break;
-			case Event::Trade:
-				ob.trade(Parser::get_trade(message_iter,end));
-				if (publisher.get()) {
-					publisher->offer(ob.trade_data());
-					publisher->offer(ob.mid_data());
-				}
-				break;
+		switch (event) {
+		default:
+			break;
+		case Event::Add:
+			ob.add(Parser::get_order(message_iter,end));
+			if (publisher.get()) {
+				publisher->offer(ob.mid_data());
+				publisher->offer(ob.book_data());
 			}
+			break;
+		case Event::Modify:
+			ob.modify(Parser::get_order(message_iter,end));
+			if (publisher.get()) {
+				publisher->offer(ob.mid_data());
+				publisher->offer(ob.book_data());
+			}
+			break;
+		case Event::Cancel:
+			ob.cancel(Parser::get_order(message_iter,end));
+			if (publisher.get()) {
+				publisher->offer(ob.mid_data());
+				publisher->offer(ob.book_data());
+			}
+			break;
+		case Event::Trade:
+			ob.trade(Parser::get_trade(message_iter,end));
+			if (publisher.get()) {
+				publisher->offer(ob.trade_data());
+				publisher->offer(ob.mid_data());
+			}
+			break;
+		case Event::Snapshot:
+			bool traded = ob.snapshot_trades(Parser::get_trades(message_iter,end));
+			ob.snapshot_orders(Parser::get_orders(message_iter,end));
+			if (publisher.get()) {
+				if (unlikely(traded)) {
+					publisher->offer(ob.trade_data());
+				}
+				else {
+					publisher->offer(ob.book_data());
+				}
+			}
+			break;
+		}
     }
 
     /**
      * Offers the book data off for publishing
-     * @param ostr Not use now as offloaded
      */
-    void printCurrentOrderBook(std::ostream &ostr) {
+    void publishOrderBook() {
     	if (publisher.get())
     		publisher->offer(ob.book_data());
      }

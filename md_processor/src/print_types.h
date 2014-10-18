@@ -43,7 +43,7 @@ static constexpr const unsigned int readable_betting_mid_format_len=51;
 static constexpr const char* csv_level_format={"%d,%d,%.2f,%.2f,%d,%d,"};
 static constexpr const unsigned int csv_level_format_len=60;
 
-static constexpr const char* csv_trade_format={"%c,%d,%d,"};
+static constexpr const char* csv_trade_format={"S,%c,%d,%d,"};
 static constexpr const unsigned int csv_trade_len=22;
 
 static constexpr const char* csv_mid_format={"%.2f,%.2f,%.2f\n"};
@@ -76,7 +76,7 @@ void print_book_base(std::ostream & ostr,BookData<n> && book) {
 template <int n=5>
 void print_book_txt(std::ostream & ostr,BookData<n> && book) {
 	ostr << readable_trading_header;
-	print_book_base(ostr,std::move(book));
+	print_book_base(ostr,std::forward<BookData<n>>(book));
 	ostr << readable_trailer;
 }
 
@@ -88,7 +88,7 @@ void print_book_txt(std::ostream & ostr,BookData<n> && book) {
 template <int n=5>
 void print_book_betting(std::ostream & ostr,BookData<n> && book) {
 	ostr << readable_betting_header;
-	print_book_base(ostr,std::move(book));
+	print_book_base(ostr,std::forward<BookData<n>>(book));
 	ostr << readable_trailer;
 }
 
@@ -121,8 +121,8 @@ void print_book_csv_base(std::ostream & ostr,BookData<n> && book) {
  */
 template <int n=5>
 void print_book_csv(std::ostream & ostr,BookData<n> && book) {
-	ostr << ",0,0,";
-	print_book_csv_base(ostr,std::move(book));
+	ostr << "S,U,0,0,";
+	print_book_csv_base(ostr,std::forward<BookData<n>>(book));
 }
 
 

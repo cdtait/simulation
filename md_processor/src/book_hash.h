@@ -35,6 +35,8 @@ struct BookHash {
 	SortedBids & get_sorted_bids();
 	SortedAsks & get_sorted_asks();
 
+	void clear();
+
 	// Bid levels as a unordered_map
     BidPriceLevels bidLevels;
     // Ask levels as a unordered_map
@@ -154,5 +156,11 @@ PriceLevelKey BookHash::get_top_ask() {
 		return PriceLevelKey();
 	}
 }
+
+void BookHash::clear() {
+	bidLevels.clear();
+	askLevels.clear();
+}
+
 
 #endif

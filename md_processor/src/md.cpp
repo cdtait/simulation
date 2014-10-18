@@ -32,10 +32,7 @@ int test(const char * file_name,	md_handler<Parser,Container> &md, PrintType pri
 			json_spirit::Array::iterator begin = trade_event_array.begin();
 			json_spirit::Array::iterator end = trade_event_array.end();
 
-			md.processMessage(begin,end);
-			if (counter > 10 && counter % 1 == 0) {
-				md.printCurrentOrderBook(std::cerr);
-			}
+			md.process_message(begin,end);
 		}
 		catch(std::exception const& e)
 		{
@@ -92,24 +89,24 @@ int main(int argc, char **argv) {
 
 	if (print_type == 'T') {
 		if (data_struct == 'M') {
-			md_handler<type_parser, BookMap> map_md;
+			md_handler<json_parser, BookMap> map_md;
 			test(file_name, map_md, PrintType::Trading);
 		} else if (data_struct == 'H') {
-			md_handler<type_parser, BookHash> map_md;
+			md_handler<json_parser, BookHash> map_md;
 			test(file_name, map_md, PrintType::Trading);
 		} else if (data_struct == 'V') {
-			md_handler<type_parser, BookVector> map_md;
+			md_handler<json_parser, BookVector> map_md;
 			test(file_name, map_md, PrintType::Trading);
 		}
 	} else if (print_type == 'C') {
 		if (data_struct == 'M') {
-			md_handler<type_parser, BookMap> map_md;
+			md_handler<json_parser, BookMap> map_md;
 			test(file_name, map_md, PrintType::CSV);
 		} else if (data_struct == 'H') {
-			md_handler<type_parser, BookHash> map_md;
+			md_handler<json_parser, BookHash> map_md;
 			test(file_name, map_md, PrintType::CSV);
 		} else if (data_struct == 'V') {
-			md_handler<type_parser, BookVector> map_md;
+			md_handler<json_parser, BookVector> map_md;
 			test(file_name, map_md, PrintType::CSV);
 		}
 	} else {
