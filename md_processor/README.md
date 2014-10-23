@@ -10,7 +10,7 @@ cd <a repository directory>
 git clone https://github.com/cdtait/simulation.git
 ```
 
-The c++ code is based on c++11 and was developed with g++ 4.8.2 and stl only. 
+The c++ code is based on c++11 and was developed with g++ 4.8.2 and stl. Included 3rd party json_spirit has dependancy on boost::spirit. 
 
 However src directory has is all the c++ files required for the project, the main file is in md.cpp. Four further sub directories are included. These too are open source inlcudes to suport the md processor. 
 
@@ -64,9 +64,21 @@ $ Release/md_processor -p C -d M -f data/md-test-2.json 2> data/md-test.C-M.stat
 This would produce the md-test-2.C-M.csv which can be used later for analysis. The md-test.C-M.stats are a record of
 errors that if the source data/md-test-2.json was produced with deliberate or otherwise invalid data these would be 
 recorded in the stats.
+```{bash}
+$ Release/md_processor ?
+Usage: feed_handler -f <file name> [-p T|C] [-d M|H|V] [-x L] [-t A|S|C]                          
+	-f is name of file to stream the input
+       The file name can be realtive or absolute
+	-p is for the type of print out put you wish to see
+       T is a text book and C is a csv format output
+	-d selects the underlying book structure to test
+       M is a map, H is a hash and V is vector base data structures
+	-x select the type of parser model to test
+       L is the simple token list parsee for csv text or json line formats
+	-i select the type of token container use in test
+       A is a json_spirt based array, S is a strtk string vector and C is a custom char* vector
+```
 
-* The -p option takes T or C meaning that we want to print in csv(C) format or readable text(T). 
-* The -d takes M H or V which are the internal data structure which we are assessing to see which performs the best. 
  * M is a std::map based order book
  * H is a std::unordered_map
  * V is std::vector base map
