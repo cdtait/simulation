@@ -16,7 +16,7 @@
    *  is sent to the order book
    *
    */
-template <typename Parser=json_parser, typename Container=BookMap>
+template <typename Parser=list_parser, typename BookContainer=BookMap>
 class md_handler {
 public:
     void stop() {
@@ -36,8 +36,10 @@ public:
      *
      * @param iter
      */
-    template <typename Iterator>
-    void process_message(Iterator& message_iter,const Iterator& end) {
+    template <typename TokenContainer>
+    void process_message(TokenContainer && tokens) {
+		auto message_iter = tokens.begin();
+		auto end = tokens.end();
         Event event = Parser::get_event(message_iter,end);
 
 		switch (event) {
@@ -104,7 +106,7 @@ public:
 
 	private:
     	// OrderBook template for a particular container
-    	OrderBook<Container> ob;
+    	OrderBook<BookContainer> ob;
     	// The publisher which handles book data messages
     	std::unique_ptr<md_publisher> publisher;
 };

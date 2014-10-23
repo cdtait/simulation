@@ -46,7 +46,7 @@ struct BookMap {
 
 /**
  *  @brief  Sort bid levels
- *  @param  book Container of with price levels
+ *  @param  book BookContainer of with price levels
  *
  *  This is the default version of the sorting.
  *
@@ -54,13 +54,13 @@ struct BookMap {
  *  template is selected for BookMap
  *
  */
-template<typename Container>
-inline void  sorted_bid(Container & book,std::map<PriceLevelKey,typename Container::Orders,GreaterComp> &ordered) {
+template<typename BookContainer>
+inline void  sorted_bid(BookContainer & book,std::map<PriceLevelKey,typename BookContainer::Orders,GreaterComp> &ordered) {
 }
 
 /**
  *  @brief  Sort ask levels
- *  @param  book Container of with price levels
+ *  @param  book BookContainer of with price levels
  *
  *  This is the default version of the sorting.
  *
@@ -68,8 +68,8 @@ inline void  sorted_bid(Container & book,std::map<PriceLevelKey,typename Contain
  *  template is selected for BookMap
  *
  */
-template<typename Container>
-inline void sorted_ask(Container & book,std::map<PriceLevelKey,typename Container::Orders,LessComp> &ordered) {
+template<typename BookContainer>
+inline void sorted_ask(BookContainer & book,std::map<PriceLevelKey,typename BookContainer::Orders,LessComp> &ordered) {
 }
 
 /**

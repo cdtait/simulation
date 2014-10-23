@@ -15,13 +15,13 @@
    *  @brief The Order book. This is an entity which allows the basic add,
    *  modify, cancel and trade expected of an order book.
    *
-   *  @tparam  Container  Type of underlying book data
+   *  @tparam  BookContainer  Type of underlying book data
    *  structure we can use and defaults the BookMap.
    */
-template <typename Container=BookMap>
+template <typename BookContainer=BookMap>
 class OrderBook {
-	typedef std::map<PriceLevelKey,typename Container::Orders,GreaterComp> SortedBids;
-	typedef std::map<PriceLevelKey,typename Container::Orders,LessComp> SortedAsks;
+	typedef std::map<PriceLevelKey,typename BookContainer::Orders,GreaterComp> SortedBids;
+	typedef std::map<PriceLevelKey,typename BookContainer::Orders,LessComp> SortedAsks;
 
 public:
 	/**
@@ -156,7 +156,7 @@ public:
 
 
 	/**
-	 *  @brief  Get the top bid from underlying Container book data structure.
+	 *  @brief  Get the top bid from underlying BookContainer book data structure.
 	 *  @return price of top bid
 	 *
 	 */
@@ -165,7 +165,7 @@ public:
 	}
 
 	/**
-	 *  @brief  Get the top ask from underlying Container book data structure.
+	 *  @brief  Get the top ask from underlying BookContainer book data structure.
 	 *  @return price of top bid
 	 *
 	 */
@@ -174,7 +174,7 @@ public:
 	}
 
 	/**
-	 *  @brief  Get the mid price from underlying Container book data structure.
+	 *  @brief  Get the mid price from underlying BookContainer book data structure.
 	 *  @return mid price as a floating point type
 	 *
 	 */
@@ -195,8 +195,8 @@ private:
 	     *  Next <price level>[order.orderid] is checked to make sure there is no duplicate
 	     *  orderid. If it does we record this as a statistic and throw runtime.
 	     *
-	     *  The PriceLevel template is part of the underlying Container type template
-	     *  parameter and could be Container::BidPriceLevels or Container::AskPriceLevels
+	     *  The PriceLevel template is part of the underlying BookContainer type template
+	     *  parameter and could be BookContainer::BidPriceLevels or BookContainer::AskPriceLevels
 	     */
 	    template<typename PriceLevels>
 	    void add_side(const Order & order,PriceLevels & sideLevels) {
@@ -223,8 +223,8 @@ private:
 	     *  Next <price level>[order.orderid] is checked to make sure it exists for
 	     *  orderid. If it does not we record this as missing and throw runtime.
 	     *
-		 *  The PriceLevel template is part of the underlying Container type template
-	     *  parameter and could be Container::BidPriceLevels or Container::AskPriceLevels
+		 *  The PriceLevel template is part of the underlying BookContainer type template
+	     *  parameter and could be BookContainer::BidPriceLevels or BookContainer::AskPriceLevels
 	     */
 	    template<typename PriceLevels>
 	    void modify_side(const Order & order,PriceLevels & sideLevels) {
@@ -262,8 +262,8 @@ private:
 	     *  Next <price level>[order.orderid] is checked to make sure it exists for
 	     *  orderid. If it does not we record this as missing and throw runtime.
 	     *
-		 *  The PriceLevel template is part of the underlying Container type template
-	     *  parameter and could be Container::BidPriceLevels or Container::AskPriceLevels
+		 *  The PriceLevel template is part of the underlying BookContainer type template
+	     *  parameter and could be BookContainer::BidPriceLevels or BookContainer::AskPriceLevels
 	     */
 	    template<typename PriceLevels>
 	    void cancel_side(const Order & order,PriceLevels & sideLevels) {
@@ -388,7 +388,7 @@ private:
 	    }
 
 	private:
-	    // Container type
+	    // BookContainer type
 	    // The actual supporting book data structure options, briefly -
 	    // 1. BookMap implemented with std::map and is implicitly sorted at runtime
 	    //    and requires sequential sum for order quantities
@@ -396,7 +396,7 @@ private:
 	    //    and requires sequential sum for order quantities
 	    // 3. BookVector implemented with std::vector with more implementation to maintain sort
 	    //    at runtime also make use vector instructions for sum for order quantities
-	    Container levels;
+	    BookContainer levels;
 	    // The total traded we maintain when monitoring trade event
 	    // The price and vector of all the quantities at this price after reset
 	    TotalTraded total_traded{};
@@ -434,7 +434,7 @@ private:
 	        for (int i =0; i < n; i++) {
 	        	// Check that we have that bid level otherwise this level is left default {0}
 	        	if (bid_it != bid_end) {
-	        		typename Container::Orders bidLevel;
+	        		typename BookContainer::Orders bidLevel;
 	        		// Expand the bid level into price key and quantities
 	        		std::tie(book.bdprice[i],bidLevel)=*(bid_it++);
 	        		book.bdcontr[i]=bidLevel.size();
@@ -442,7 +442,7 @@ private:
 	        	}
 	        	// Check that we have that ask level otherwise this level is left default {0}
 	        	if (ask_it != ask_it_end) {
-	        		typename Container::Orders askLevel;
+	        		typename BookContainer::Orders askLevel;
 	        		// Expand the bid level into price key and quantities
 	        		std::tie(book.sdprice[i],askLevel)=*(ask_it++);
 	        		book.sdcontr[i]=askLevel.size();

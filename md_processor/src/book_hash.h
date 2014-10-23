@@ -51,7 +51,7 @@ private:
 
 /**
  *  @brief  Sort bid levels
- *  @param  book Container of with price levels
+ *  @param  book BookContainer of with price levels
  *
  *  This is the specialized version of the sorting for BookHash explicitly.
  *
@@ -69,7 +69,7 @@ inline void sorted_bid(BookHash & book,BookHash::SortedBids &ordered) {
 
 /**
  *  @brief  Sort ask levels
- *  @param  book Container of with price levels
+ *  @param  book BookContainer of with price levels
  *
  *  This is the specialized version of the sorting for BookHash explicitly.
  *

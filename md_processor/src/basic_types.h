@@ -152,7 +152,7 @@ struct BookData {
 
 /**
  *  @brief   This is the default sum template used by the map containers
- *  @tparam  Orders This is the Containers internal data structure for the orders
+ *  @tparam  Orders This is the BookContainers internal data structure for the orders
  *  @param   orders Orders type used in the sum
  *  @return	 the sum of the order quantities
  *
@@ -166,7 +166,7 @@ inline auto sum(Orders & orders) -> QuantityValueType {
 
 /**
  *  @brief   This is the specialized sum template used by vector of quanties as the BookVector has
- *  @tparam  Orders This is the Containers internal data structure for the orders
+ *  @tparam  Orders This is the BookContainers internal data structure for the orders
  *  @param   orders Orders type used in the sum
  *  @return	 the sum of the order quantities
  *
