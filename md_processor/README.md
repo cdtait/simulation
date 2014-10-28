@@ -33,7 +33,7 @@ rm -rf  ./src/md.o  ./src/md.d  md_processor
 $ make
 Building file: ../src/md.cpp
 Invoking: GCC C++ Compiler
-g++ -I"/home/obod/git/simulation/md_processor/src" -I"/home/obod/git/simulation/md_processor/src/vectorclass" -O3 -Wall -c -fmessage-length=0 -std=c++11 -fabi-version=4 -MMD -MP -MF"src/md.d" -MT"src/md.d" -o "src/md.o" "../src/md.cpp"
+g++ -I"../src" -I"../src/vectorclass" -O3 -Wall -c -fmessage-length=0 -std=c++11 -fabi-version=4 -MMD -MP -MF"src/md.d" -MT"src/md.d" -o "src/md.o" "../src/md.cpp"
 Finished building: ../src/md.cpp
  
 Building target: md_processor
@@ -75,7 +75,7 @@ Usage: feed_handler -f <file name> [-p T|C] [-d M|H|V] [-x L] [-t A|S|C]
        M is a map, H is a hash and V is vector base data structures
 	-x select the type of parser model to test
        L is the simple token list parsee for csv text or json line formats
-	-i select the type of token container use in test
+	-t select the type of token container use in test
        A is a json_spirt based array, S is a strtk string vector and C is a custom char* vector
 ```
 
