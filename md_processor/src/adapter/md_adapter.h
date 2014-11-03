@@ -29,7 +29,7 @@ struct md_adapter {
     }
     bool stopped=true;
     int counter=0;
-    uint32_t numMessages=0;
+    int32_t numMessages=0;
 };
 
 #endif
