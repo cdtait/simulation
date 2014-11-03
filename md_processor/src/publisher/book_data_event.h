@@ -32,7 +32,7 @@ class BookDataEvent {
     }
 
     /**
-     * The book_data we hodl against the vent
+     * The book_data we hold against the vent
      * @return the book_data
      */
     BookData<5>&& book_data() {

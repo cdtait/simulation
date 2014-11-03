@@ -4,12 +4,14 @@
 #include <string>
 
 #include "md_handler.h"
-#include "md_file_adapter.h"
+#include "md_adapters.h"
 
 #include <queue>
 
 /** @brief
  *
+ * Allows a selection of many combinations of coding data structures for market data processing.
+ * The result is the impact factor in the integrity and performance of the code.
  *
  */
 
@@ -30,34 +32,32 @@ PrintType char2printtype(char print_type) {
 }
 
 /**
- * Run a file based test with the file base input adapter
+ * Run a test with the file base input adapter
  *
  * @param file_name
  * @param md the md handlert
  * @param printType
  * @return
  */
-template <typename TokenContainer, typename Parser, typename BookContainer>
-int run_file_test(const char * file_name, md_handler<Parser,BookContainer> &md, PrintType printType)
+template <typename Adapter,typename MD>
+int run_test(MD &md, Adapter &adapter, PrintType printType)
 {
-	md.start(printType);
-	md_file_adapter file_adapter(file_name);
-
 	struct timeval start_time_;
 	struct timeval stop_time_;
+
+	md.start(printType);
+	adapter.wait();
 	::gettimeofday(&start_time_, NULL);
-
-	file_adapter.start<TokenContainer>(md);
-	file_adapter.stop();
-
+	adapter.start(md);
 	::gettimeofday(&stop_time_, NULL);
+	adapter.stop();
+	md.stop();
 
 	double total_micros = ((1e6 * (stop_time_.tv_sec  - start_time_.tv_sec )) + (stop_time_.tv_usec - start_time_.tv_usec));
-	std::cerr << "Time to process " << file_adapter.get_counter() << " messages => " << total_micros << " micros" << std::endl;
-	std::cerr << "Time for each => " << (total_micros/file_adapter.get_counter())*1000 << " nanos" << std::endl;
-
+	std::cerr << "Time to process " << adapter.get_counter() << " messages => " << total_micros << " micros\n";
+	std::cerr << "Time for each => " << (total_micros/adapter.get_counter())*1000 << " nanos\n";
+	std::cerr << std::flush;
 	md.printStats(std::cerr);
-	md.stop();
 
   return 0;
 }
@@ -66,48 +66,113 @@ int run_file_test(const char * file_name, md_handler<Parser,BookContainer> &md, 
 
 void print_usage() {
 	std::string message =
-{R"(Usage: feed_handler -f <file name> [-p T|C] [-d M|H|V] [-x L] [-t A|S|C]                          
+{R"(Usage: feed_handler -f <file name> [-p T|C] [-d M|H|V] [-x L] [-t A|S|C] [-a F|P|ZR|ZP|ZS ] [-s P|D|N ]                    
        -f is name of file to stream the input
-         The file name can be realtive or absolute
+         The file name can be relative or absolute
        -p is for the type of print out put you wish to see
          T is a text book and C is a csv format output
        -d selects the underlying book structure to test
          M is a map, H is a hash and V is vector base data structures
        -x select the type of parser model to test
-         L is the simple token list parsee for csv text or json line formats
+         L is the simple token list parse for csv text or json line formats
        -t select the type of token container use in test
          A is a json_spirit based array, S is a strtk string vector and C is a custom char* vector
          Important - When using json_spirit it will expect a json file where S and C expect csv.
+       -a select the adapter to source the market data
+         F is a file based input
+         Zx uses a zeromq broken into different models aimed at demonstrating messaging
+			ZR - Reliable-request-reply
+			ZS - Subscriber
+			ZP - Pull
+         P is a pcap device either file or ethernet alias
+       -s select publisher to handle the output we want
+         P is print based publisher
+         D is the disruptor
+         N is none action publisher
 )"};
 
     printf(message.c_str());
 }
 
-template <typename TokenContainer>
-void select_data_structure_and_run_test(char data_struct,
-		PrintType print_type,
-		char* file_name) {
-	if (data_struct == 'M') {
-		md_handler<list_parser, BookMap> md_handler;
-		run_file_test<TokenContainer>(file_name, md_handler, print_type);
-	} else if (data_struct == 'H') {
-		md_handler<list_parser, BookHash> md_handler;
-		run_file_test<TokenContainer>(file_name, md_handler, print_type);
-	} else if (data_struct == 'V') {
-		md_handler<list_parser, BookVector> md_handler;
-		run_file_test<TokenContainer>(file_name, md_handler, print_type);
+/**
+ *
+ * @param file_name
+ * @param md
+ * @param printType
+ * @param adapter
+ */
+template <typename TokenContainer, typename Parser, typename BookContainer, typename Publisher>
+void select_adapter_and_run_test(const char * file_name,
+		md_handler<Parser,BookContainer,Publisher> &md,
+		const std::string& adapter,
+		PrintType printType) {
+	typedef md_handler<Parser,BookContainer,Publisher> MD;
+
+	if (adapter == "F") {
+		file_adapter<TokenContainer,MD> adapter(file_name);
+		run_test(md,adapter,printType);
+	} else if (adapter == "ZR") {
+		md_zmq_rrr_adapter<TokenContainer,MD> adapter;
+		run_test(md,adapter,printType);
+	} else if (adapter == "ZP") {
+		md_zmq_pull_adapter<TokenContainer,MD> adapter;
+		run_test(md,adapter,printType);
+	} else if (adapter == "ZS") {
+		md_zmq_sub_adapter<TokenContainer,MD> adapter;
+		run_test(md,adapter,printType);
+	} else if (adapter == "P") {
+		md_pcap_adapter<TokenContainer,MD> adapter(file_name);
+		run_test(md,adapter,printType);
 	} else {
 		print_usage();
 	}
 }
 
-template <typename TokenContainer>
-void select_parser_and_run_test(char data_struct,
-		PrintType print_type,
-		char* file_name,
-		char parser) {
-	if (parser == 'L') {
-		select_data_structure_and_run_test<TokenContainer>(data_struct,print_type,file_name);
+/**
+ * Select the data structure we want to use for underlying book.
+ *
+ * @param file_name File/device we use for parsing
+ * @param data_struct Type of data structure used for book
+ * @param adapter The adapter for the source of data i.e file or pcap etc
+ * @param print_type type print format type
+ */
+template <typename TokenContainer, typename Publisher>
+void select_data_structure_and_run_test(char* file_name,
+		const std::string & adapter,
+		const std::string & data_struct,
+		PrintType print_type) {
+	if (data_struct == "M") {
+		md_handler<list_parser, BookMap, Publisher> md_handler;
+		select_adapter_and_run_test<TokenContainer>(file_name, md_handler, adapter, print_type);
+	} else if (data_struct == "H") {
+		md_handler<list_parser, BookHash, Publisher> md_handler;
+		select_adapter_and_run_test<TokenContainer>(file_name, md_handler, adapter, print_type);
+	} else if (data_struct == "V") {
+		md_handler<list_parser, BookVector, Publisher> md_handler;
+		select_adapter_and_run_test<TokenContainer>(file_name, md_handler, adapter, print_type);
+	} else {
+		print_usage();
+	}
+}
+
+/**
+ * Select the parser model we want, L is the basic simple list.
+ * Betfair or other trading exchanges may have much more complex models
+ *
+ * @param file_name File/device we use for parsing
+ * @param adapter The adapter for the source of data i.e file or pcap etc
+ * @param data_struct Type of data structure used for book
+ * @param parser Type of parser we use depending on data stream model
+ * @param print_type type print format type
+ */
+template <typename TokenContainer,typename Publisher>
+void select_parser_and_run_test(char* file_name,
+		const std::string adapter,
+		const std::string data_struct,
+		const std::string parser,
+		PrintType print_type) {
+	if (parser == "L") {
+		select_data_structure_and_run_test<TokenContainer,Publisher>(file_name,adapter,data_struct,print_type);
 	}
 	// Other parser specific to the shape of the data
 	else {
@@ -115,23 +180,35 @@ void select_parser_and_run_test(char data_struct,
 	}
 }
 
-void select_token_method_and_run_test(char data_struct,
-		PrintType print_type,
-		char* file_name,
-		char parser,
-		char tokenizer) {
+/**
+ * Select the tokenizer and then select the correct parser
+ *
+ * @param file_name File/device we use for parsing
+ * @param adapter The adapter for the source of data i.e file or pcap etc
+ * @param data_struct Type of data structure used for book
+ * @param parser Type of parser we use depending on data stream model
+ * @param tokenizer the token structure we use for decoding the stream
+ * @param print_type type print format type
+ */
+template <typename Publisher>
+void select_token_method_and_run_test(char* file_name,
+		const std::string& adapter,
+		const std::string&  data_struct,
+		const std::string&  parser,
+		const std::string&  tokenizer,
+		PrintType print_type) {
 	// Allows a comparison between different tokenization techniques
-	if (tokenizer=='A') {
+	if (tokenizer=="A") {
 		// Tokenized simple csv json array
-		select_parser_and_run_test<json_token_array>(data_struct, print_type, file_name, parser);
+		select_parser_and_run_test<json_token_array,Publisher>(file_name,adapter,data_struct,parser,print_type);
 	}
-	else if(tokenizer=='S') {
+	else if(tokenizer=="S") {
 		// Tokenized csv std::string vector
-		select_parser_and_run_test<string_token_vector>(data_struct, print_type, file_name, parser);
+		select_parser_and_run_test<string_token_vector,Publisher>(file_name,adapter,data_struct,parser,print_type);
 	}
-	else if(tokenizer=='C') {
+	else if(tokenizer=="C") {
 		// Tokenized csv char * vector
-		select_parser_and_run_test<char_token_vector>(data_struct, print_type, file_name, parser);
+		select_parser_and_run_test<char_token_vector,Publisher>(file_name,adapter,data_struct,parser,print_type);
 	}
 	else {
 		print_usage();
@@ -139,16 +216,63 @@ void select_token_method_and_run_test(char data_struct,
 	}
 }
 
+/**
+ * Select the correct publisher and then select the correct tokenizer
+ *
+ * @param file_name File/device we use for parsing
+ * @param adapter The adapter for the source of data i.e file or pcap etc
+ * @param data_struct Type of data structure used for book
+ * @param parser Type of parser we use depending on data stream model
+ * @param tokenizer the token structure we use for decoding the stream
+ * @param publisher the pusher type
+ * @param print_type type print format type
+ */
+void select_publisher_and_run_test(char* file_name,
+		const std::string& adapter,
+		const std::string&  data_struct,
+		const std::string&  parser,
+		const std::string&  tokenizer,
+		const std::string& publisher,
+		PrintType print_type) {
+	// Allows a comparison between different tokenization techniques
+	if (publisher=="D") {
+		// Tokenized simple csv json array
+		select_token_method_and_run_test<disruptor_publisher<>>(file_name,adapter,data_struct,parser,tokenizer,print_type);
+	}
+	else if(publisher=="P") {
+		// Tokenized csv std::string vector
+		select_token_method_and_run_test<print_publisher<>>(file_name,adapter,data_struct,parser,tokenizer,print_type);
+	}
+	else if(publisher=="N") {
+		// Tokenized csv char * vector
+		select_token_method_and_run_test<null_publisher>(file_name,adapter,data_struct,parser,tokenizer,print_type);
+	}
+	else {
+		print_usage();
+		exit(EXIT_FAILURE);
+	}
+}
+
+/**
+ * Select and run a test with different data structures, tokenizers, adapters and parser model in order
+ * to asses performance, regression and process features.
+ *
+ * @param argc
+ * @param argv
+ * @return
+ */
 int main(int argc, char **argv) {
 	int option = 0;
 	PrintType print_type = PrintType::Trading;
-	char data_struct = 'M';
-	char parser = 'L';
-	char tokenizer = 'A';
+	std::string data_struct = "M";
+	std::string parser = "L";
+	std::string tokenizer = "A";
+	std::string adapter = "F";
+	std::string publisher = "P";
 
 	char * file_name=nullptr;
 
-	while ((option = getopt(argc, argv, "h?f:p:d:x:t:")) != -1) {
+	while ((option = getopt(argc, argv, "h?f:p:d:x:t:a:s:")) != -1) {
 		switch (option) {
 		std::cout << option << std::endl;
 		case '?':
@@ -162,13 +286,19 @@ int main(int argc, char **argv) {
 			print_type = char2printtype(optarg[0]);
 			break;
 		case 'd':
-			data_struct = optarg[0];
+			data_struct = optarg;
 			break;
 		case 'x':
-			parser = optarg[0];
+			parser = optarg;
 			break;
 		case 't':
-			tokenizer = optarg[0];
+			tokenizer = optarg;
+			break;
+		case 'a':
+			adapter = optarg;
+			break;
+		case 's':
+			publisher = optarg;
 			break;
 		default:
 			print_usage();
@@ -178,28 +308,36 @@ int main(int argc, char **argv) {
 
 	std::string f(file_name);
 
-	if (!file_name ) {
-		print_usage();
-		exit(EXIT_FAILURE);
+	// Check if we need a file name
+	if (!file_name) {
+		// If we are using zero mq we don't need a filename or device name
+		if (adapter[0] != 'Z') {
+			print_usage();
+			exit(EXIT_FAILURE);
+		}
+	}
+	else {
+		// If we are using csv then either 'C' character or string 'S' would be valid
+		// With json only json array 'A'
+		if (
+			(f.substr(f.length()-4,f.length())==".csv" && tokenizer=="A") ||
+			(f.substr(f.length()-5,f.length())==".json" && (tokenizer=="C" || tokenizer=="S"))
+		)
+		{
+			printf("Bad combination of tokenizer and file type\n");
+			print_usage();
+			exit(EXIT_FAILURE);
+		}
 	}
 
-	if (
-		(f.substr(f.length()-4,f.length())==".csv" && tokenizer=='A') ||
-		(f.substr(f.length()-5,f.length())==".json" && (tokenizer=='C' || tokenizer=='S'))
-	)
-	{
-		printf("Bad combination of tokenizer and file type\n");
-		print_usage();
-		exit(EXIT_FAILURE);
-	}
-
-
+	// Is it a vallid print type
 	if (print_type==PrintType::Unknown) {
 		print_usage();
 		exit(EXIT_FAILURE);
 	}
 
-	select_token_method_and_run_test(data_struct,print_type,file_name,parser,tokenizer);
+	// Start the test by configuring the options then passing it on to run_test
+	select_publisher_and_run_test(file_name,adapter,data_struct,parser,tokenizer,publisher,print_type);
 
 	return 0;
 }

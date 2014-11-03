@@ -1,3 +1,6 @@
+#ifndef disruptor_publisher_h
+#define disruptor_publisher_h
+
 #include <sys/time.h>
 
 #include <exception>
@@ -12,6 +15,8 @@
 #include <disruptor/exception_handler.h>
 
 #include "book_data_event.h"
+
+#include "md_publisher.h"
 
 using namespace disruptor;
 
@@ -29,12 +34,15 @@ using namespace disruptor;
  * We are only using one consumer here which you will see in book_data_events.h
  *
  */
-class md_publisher {
+template<int N=5>
+class disruptor_publisher : public md_publisher<N> {
 public:
-	md_publisher(PrintType printType) : buffer_size(1024*80),
+	disruptor_publisher(PrintType printType) : buffer_size(1024*100),
 					book_data_factory{},
+					//ring_buffer(&book_data_factory, buffer_size,
+					//kSingleThreadedStrategy, kBusySpinStrategy),
 					ring_buffer(&book_data_factory, buffer_size,
-					kSingleThreadedStrategy, kBusySpinStrategy),
+										kSingleThreadedStrategy, kBlockingStrategy),
 					sequence_to_track(0),
 					barrier(ring_buffer.NewBarrier(sequence_to_track)),
 				 	book_data_handler(printType),
@@ -88,7 +96,9 @@ private:
 	BatchEventProcessor<BookDataEvent> processor;
 	// The thread our off loaded consumer runs in
 	std::thread consumer;
-	// Custiom translator for data messages i.e book_data
+	// Custom translator for data messages i.e book_data
 	std::unique_ptr<BookDataEventTranslator> translator;
 	EventPublisher<BookDataEvent> publisher;
 };
+
+#endif

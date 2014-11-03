@@ -5,9 +5,9 @@
 #include <iostream>
 
 #include "md_types.h"
-#include "parsers.h"
-#include "order_book.h"
-#include "md_publisher.h"
+#include "md_parsers.h"
+#include "md_order_book.h"
+#include "md_publishers.h"
 
 /**
    *  @brief Implementation of the md handler
@@ -16,7 +16,7 @@
    *  is sent to the order book
    *
    */
-template <typename Parser=list_parser, typename BookContainer=BookMap>
+template <typename Parser=list_parser, typename BookContainer=BookMap,typename Publisher=print_publisher<>>
 class md_handler {
 public:
     void stop() {
@@ -24,7 +24,7 @@ public:
     }
 
     void start(PrintType printType) {
-    	publisher=std::make_unique<md_publisher>(printType);
+    	publisher=std::make_unique<Publisher>(printType);
     }
 
     /**
@@ -108,7 +108,7 @@ public:
     	// OrderBook template for a particular container
     	OrderBook<BookContainer> ob;
     	// The publisher which handles book data messages
-    	std::unique_ptr<md_publisher> publisher;
+    	std::unique_ptr<Publisher> publisher;
 };
 
 typedef md_handler<> MDHandler;
