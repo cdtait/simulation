@@ -93,6 +93,8 @@ class BookDataBatchHandler : public EventHandlerInterface<BookDataEvent> {
 		BookDataBatchHandler(PrintType printType) :
 			EventHandlerInterface<BookDataEvent>()
 	{
+			// TODO This should just be a print_publisher
+			// rather than have these print functors
 			if (printType==PrintType::Trading) {
 				print_trade_f=print_trade_txt<5>;
 			    print_book_f=print_book_txt<5>;
@@ -121,6 +123,8 @@ class BookDataBatchHandler : public EventHandlerInterface<BookDataEvent> {
     virtual void OnEvent(const int64_t& sequence,
                          const bool& end_of_batch,
                          BookDataEvent* event) {
+		// TODO This should just be a print_publisher
+		// rather than have these print functors
         if (event) {
         	if (event->book_data().event==Event::Trade) {
         		print_trade_f(std::cout,event->book_data());
@@ -138,6 +142,9 @@ class BookDataBatchHandler : public EventHandlerInterface<BookDataEvent> {
     virtual void OnShutdown() {}
 
  private:
+	// TODO This should just be a print_publisher
+	// rather than have these print functors
+
     // Trade event printing function
 	PrintFunctionType<5>::Funcp print_trade_f;
 	// Book event printing function

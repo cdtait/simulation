@@ -3,6 +3,9 @@
 
 #include "md_types.h"
 
+/**
+ * @brief Interface for publisher so they implement stop and offer
+ */
 template <int N=5>
 class md_publisher {
 public:

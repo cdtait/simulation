@@ -3,6 +3,9 @@
 
 #include "md_publisher.h"
 
+/**
+ * @brief publisher which does nothing, useful for raw timing
+ */
 class null_publisher : public md_publisher<> {
 public:
 	null_publisher(PrintType printType) {}

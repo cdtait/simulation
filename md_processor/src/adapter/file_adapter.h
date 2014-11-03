@@ -5,7 +5,9 @@
 #include "md_adapter.h"
 
 /**
-  *  @brief Implementation of the md_adapter
+  *  @brief Implementation of the file_adapter
+  *  Simply loops round a csv or json or text file and sends the
+  *  message to the processor.
   *
   */
 template <
@@ -19,9 +21,17 @@ public:
 		infile(fn, std::ios::in) {
 	}
 
+	/**
+	 * No need to know the number of messages
+	 */
 	void wait() {
 	}
 
+	/**
+	 * Start the adapter processing.
+	 *
+	 * @param md The market data handler we will send the data to
+	 */
     void start(MD & md) {
     	stopped=false;
 
