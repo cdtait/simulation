@@ -302,7 +302,7 @@ class MDGenerator(object):
         self.ob.add(match_message)
         print('A,'+match_message)
         
-        self.error_strategy.gen_bogus_add_order(side,quantity,price,self.gen_order_id,flip_side)
+        self.error_strategy.gen_bogus_add_order(side,quantity,price,self.gen_order_id,flip_side,self.ob)
         # Here we can generate a bogus add order which causes a 
         # match with no trades occuring error.
         #if self.errors and random.randint(1,500) == 1:
@@ -312,7 +312,7 @@ class MDGenerator(object):
         #    print('A,'+best_sell_le_best_buy_message)
         #    self.best_sell_le_best_buy_error += 1
             
-        self.error_strategy.gen_bogus_trade(side,quantity,price)
+        self.error_strategy.gen_bogus_trade(side,quantity,price,self.tick_size)
         # Here we can generate a bogus trade with no corresponding order
         #if self.errors and random.randint(1,500) == 1:
         #    no_order_for_trade_message='{0:d},{1:.0f}'.format(1,price-self.tick_size)
