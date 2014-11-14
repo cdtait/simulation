@@ -1,6 +1,38 @@
-MD Processor
-------------
+# Market Data Simulation
 
+Configurable tool to test raw performance and alternate components of market data systems
+
+## Overview
+
+This part simulation frame work is designed to enable an assortment of pluggable choices of stream adapters for file, message queue or packet capture. Different stream formats - binary, csv , json, fast fix etc. We can examine different order book models from trading or even betting system such as betafair. Also you can change the underlying order book data structure and select different outbound sinks. This is all targeted at being able to measure performance and reliability over differnt combinations of processing mechanisms and data models.
+
+The following diagtram shows a pluggable desgin consisteng of a (MD) market data adapter/translator taking the raw feed and tranforming into a stream  messages. These are given to the (MD Processor) processor whose task is to create order book and trading messages which feed to consumer systems for publishing, logging, alogorithmic processing or trading information systems etc via high speed message queue.
+
+<figure role="group">
+<img src="images/MDProcessorOverview.jpg" alt="MDProcessor" style="width: 600px; height: 300px;" title="MDProcessor"/>
+<figcaption>Fig 1. Overview</figcaption>
+</figure>
+
+## Processor
+The Processor design is aimed at handling data produced by the md_simulator or real world market data producers like betfair or other trading platforms. Processing this data enables different simulation strategies from different sources such as betting or trading to create output with trade and pricing book structure in a form that can be loaded into analysis tools.
+
+The processor is resonsible for -
+
+1. Parsing the json events and trap any corruption error type scenarios.
+2. Create event objects which can be presented to the order book
+3. Order book implement the methods that respond to add, modify, cancel and trade
+4. Back the order book which a storage data structure which will allow prices at levels to be maintained and orders to be held at each price. Levels are Buy(Bid) or Sell(Ask).
+5. The order book needs to present itself in a readable form so implement some sort of output stream/print function
+6. The handler then is created to make use of the event objects and direct the methods to call on the order book object. The interface look and feel tries to keep in line with the stub code given in specification.
+7. Processor provides a methods to print the error summary from the processing of the feed and this in turn implies we need some sort of globally available statistics recording object as both the order book and parsing parts of the flow.
+
+
+<figure role="group">
+<img src="images/MDProcessorDetail.jpg" alt="MDProcessor" style="width: 800px; height: 500px;" title="MDProcessor"/>
+<figcaption>Fig 2. MDProcessor</figcaption>
+</figure>
+
+---
 ## Installation
 
 You can install md_processor (if you have not already done so for md_simulation) from `github` using the 
@@ -139,38 +171,6 @@ Usage: feed_handler -f <file name> [-p T|C] [-d M|H|V] [-x L] [-t A|S|C] [-a F|P
  * H is a std::unordered_map
  * V is std::vector base map
 
-
-# Simulation
-
-## Overview
-
-The simulation frame work is designed to enable an assortment of pluggable choices of stream apdapters for like file, message queue or packet capture. Different stream formats - binary, csv , json, fast fix etc. We can examine differnt order book models from trading i.e CME, Eurex, Liffe Nasdaq or even betting system such as betafair. Also you can change the underlying order book data structure and select different outbound sinks. This is all targeted at being able to measure performance and reliability over differnt combinations of processing mechanisms and data models.
-
-<figure role="group">
-<img src="images/MDProcessorOverview.jpg" alt="MDProcessor" style="width: 600px; height: 300px;" title="MDProcessor"/>
-<figcaption>Fig 1. Overview</figcaption>
-</figure>
-
-## Processor
-The Processor design is aimed at handling data produced by the md_simulator or real world market data producers like betfair or other trading platforms. Processing this data enables different simulation strategies from different sources such as betting or trading to create output with trade and pricing book structure in a form that can be loaded into analysis tools.
-
-The processor is resonsible for -
-
-1. Parsing the json events and trap any corruption error type scenarios.
-2. Create event objects which can be presented to the order book
-3. Order book implement the methods that respond to add, modify, cancel and trade
-4. Back the order book which a storage data structure which will allow prices at levels to be maintained and orders to be held at each price. Levels are Buy(Bid) or Sell(Ask).
-5. The order book needs to present itself in a readable form so implement some sort of output stream/print function
-6. The handler then is created to make use of the event objects and direct the methods to call on the order book object. The interface look and feel tries to keep in line with the stub code given in specification.
-7. Processor provides a methods to print the error summary from the processing of the feed and this in turn implies we need some sort of globally available statistics recording object as both the order book and parsing parts of the flow.
-
-
-<figure role="group">
-<img src="images/MDProcessorDetail.jpg" alt="MDProcessor" style="width: 800px; height: 500px;" title="MDProcessor"/>
-<figcaption>Fig 2. MDProcessor</figcaption>
-</figure>
-
----
 
 ### Credits
 - [disruptor](https://github.com/fsaintjacques/disruptor--) by François Saint-Jacques
