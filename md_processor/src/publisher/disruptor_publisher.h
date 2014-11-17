@@ -34,15 +34,17 @@ using namespace disruptor;
  * We are only using one consumer here which you will see in book_data_events.h
  *
  */
+
+// Requirement buffer as power of 2
+constexpr int buffSize=std::pow(2,18);
+
 template<int N=5>
 class disruptor_publisher : public md_publisher<N> {
 public:
-	disruptor_publisher(PrintType printType) : buffer_size(1024*100),
+	disruptor_publisher(PrintType printType) : buffer_size(buffSize),
 					book_data_factory{},
-					//ring_buffer(&book_data_factory, buffer_size,
-					//kSingleThreadedStrategy, kBusySpinStrategy),
 					ring_buffer(&book_data_factory, buffer_size,
-										kSingleThreadedStrategy, kBlockingStrategy),
+					kSingleThreadedStrategy, kBusySpinStrategy),
 					sequence_to_track(0),
 					barrier(ring_buffer.NewBarrier(sequence_to_track)),
 				 	book_data_handler(printType),
