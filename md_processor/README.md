@@ -142,7 +142,7 @@ errors that if the source data/md-test-2.json was produced with deliberate or ot
 recorded in the stats.
 ```{bash}
 $ Release/md_processor ?
-Usage: feed_handler -f <file name> [-p T|C] [-d M|H|V] [-x L] [-t A|S|C] [-a F|P|ZR|ZP|ZS ] [-s P|D|N ]                    
+Usage: md_processor -f <file name> [-p T|C] [-d M|H|V] [-x L] [-t A|S|C] [-a F|P|ZR|ZP|ZS ] [-s P|D|N ]                    
        -f is name of file to stream the input
          The file name can be relative or absolute
        -p is for the type of print out put you wish to see

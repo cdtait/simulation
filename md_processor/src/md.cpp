@@ -66,7 +66,7 @@ int run_test(MD &md, Adapter &adapter, PrintType printType)
 
 void print_usage() {
 	std::string message =
-{R"(Usage: feed_handler -f <file name> [-p T|C] [-d M|H|V] [-x L] [-t A|S|C] [-a F|P|ZR|ZP|ZS ] [-s P|D|N ]                    
+{R"(Usage: md_processor -f <file name> [-p T|C] [-d M|H|V] [-x L] [-t A|S|C] [-a F|P|ZR|ZP|ZS ] [-s P|D|N ]                    
        -f is name of file to stream the input
          The file name can be relative or absolute
        -p is for the type of print out put you wish to see
@@ -306,12 +306,11 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	std::string f(file_name);
-
 	// Check if we need a file name
 	if (!file_name) {
 		// If we are using zero mq we don't need a filename or device name
 		if (adapter[0] != 'Z') {
+			printf("No file input\n");
 			print_usage();
 			exit(EXIT_FAILURE);
 		}
@@ -319,6 +318,7 @@ int main(int argc, char **argv) {
 	else {
 		// If we are using csv then either 'C' character or string 'S' would be valid
 		// With json only json array 'A'
+		std::string f(file_name);
 		if (
 			(f.substr(f.length()-4,f.length())==".csv" && tokenizer=="A") ||
 			(f.substr(f.length()-5,f.length())==".json" && (tokenizer=="C" || tokenizer=="S"))
