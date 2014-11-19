@@ -73,7 +73,7 @@ participants in the market. So as a starting point we can see if it is feasible
 to produce price movement shapes that can be recognised in amongst the chaotic
 background noise. The ultimate goal is to use this as a basis to create new stratgeies in the generator which we can create behaviours that can be recognised.
 
-```{python}
+```python
     %pylab inline
     
     import pylab as pl
@@ -88,15 +88,16 @@ background noise. The ultimate goal is to use this as a basis to create new stra
 
 Take a very simple sum of 2 sine waves as a price movement curve.
 
-
+```python
     N = 10000
     X = np.linspace(0, 2*np.pi, N)[:, np.newaxis]
     y = (np.cos(X).ravel()+ 0.5*np.cos(10 * X).ravel())
+```
 
 We can see that the function has characteristics that may allow us to build
 patterns from parts or all of the range.
 
-
+```python
     plt.figure(figsize=(6, 4))
     plt.plot(X.ravel(), y, color='blue')
 
@@ -105,7 +106,7 @@ patterns from parts or all of the range.
 
     [<matplotlib.lines.Line2D at 0x36ce890>]
 
-
+```
 
 
 ![png](SimulatingPriceRecognition_files/SimulatingPriceRecognition_6_1.png)
@@ -118,7 +119,7 @@ template to make other patterns. In order to find the y points at the intervals
 in the y axis which are effectively the roots of the template function crossing
 at the y interval line.
 
-
+```python
     from scipy.optimize import fsolve
     from collections import OrderedDict
     
@@ -159,48 +160,41 @@ at the y interval line.
         yline.fill(round(ys,2))
         ypoints=append(ypoints,yline)
         xpoints=append(xpoints,xroots)
-
+```
 On completing the pass and finding the roots on each plane we don't nesccersial
 have them in x axis acending order so to we sort by the points in the xaxis.
-
-
+```python
     xpoints_sorted_index=np.argsort(xpoints)
     xpoints=xpoints[xpoints_sorted_index]
     ypoints=ypoints[xpoints_sorted_index]
-
+```
 To make is clearer what we have found here we can show the points plotted
 against the true curve.
-
-
+```python
     plt.figure(figsize=(6, 4))
     plt.plot(xpoints, ypoints, '.k', color='red')
     plt.plot(X.ravel(), y, color='blue')
 
-
-
-
     [<matplotlib.lines.Line2D at 0x36e3c50>]
-
-
-
+```
 
 ![png](SimulatingPriceRecognition_files/SimulatingPriceRecognition_12_1.png)
-
 
 As a probe into using this curve as a template and break into into 2 patterns
 which we will use in the simulation and try to recognise when the patterns
 appear in a cluster of other patterns and stocastic noise.
 
-
+```python
     ysect1=ypoints[xpoints<np.pi]
     xsect1=xpoints[xpoints<np.pi]
     ysect2=ypoints[xpoints>=np.pi]
     xsect2=xpoints[xpoints>=np.pi]
+```
 
 Its useful to develop some functions that can help create pattern images that
 can be interspersed in other patterns.
 
-
+```python
     import time
     
     # Use time cycle to produce a more random seed
@@ -229,15 +223,14 @@ can be interspersed in other patterns.
         Yp=(ypattern[:Xp.shape[0]]+Yerror)
         
         return(Xp,Yp)
-
+```
 
 Create a way generating a set of test sample patterns which we can shuffle to
 gether to produce an noisy set of patterns so altogether we have 2400 patterns
 some upward cycles some downward of 2 different sizes and some noise of 2
 different sizes.
 
-
-    
+```python
     def gen_test_samples():
         '''
         The 6 patterns we create a number each as set of data
@@ -281,53 +274,46 @@ different sizes.
         return(target,data)
     
     (target,data)=gen_test_samples()
+```
 
 The test sample is geared towards being modelled as a classification problem so
 we want to train and set of data and match that with a crosss validation set to
 enable a classification alogrithm to make a better fit or performance.
 
-
+```python
     from sklearn.cross_validation import train_test_split
     X_train, X_test, y_train, y_test = train_test_split(data, target, random_state=0)
     
     print X_train.shape, X_test.shape
 
     (1800, 200) (600, 200)
-
+```
 
 Before we apply the classification we can have a look at an other technique
 often used in conjunction with classification and can aid the performance of of
 the classifier although in this case it is not neccesary as we effectively have
 only 200 features per sample as we seen from the previous shape descriptions.
 
-
+```python
     from sklearn import decomposition
     pca = decomposition.RandomizedPCA(n_components=100, whiten=True)
     pca.fit(X_train)
 
-
-
-
     RandomizedPCA(copy=True, iterated_power=3, n_components=100,
            random_state=None, whiten=True)
-
+```
 
 
 So have a look at avarage pca shape of 100 features and see what it looks like.
 
-
+```python
     pca.mean_.shape
     pcax,pcay=pca.mean_.reshape(2,100)
     plt.plot(pcax,pcay,color='blue')
     pca.mean_.shape
 
-
-
-
     (200,)
-
-
-
+```
 
 ![png](SimulatingPriceRecognition_files/SimulatingPriceRecognition_24_1.png)
 
@@ -335,10 +321,9 @@ So have a look at avarage pca shape of 100 features and see what it looks like.
 Produce a test set from the pca to see the performance with reduced features
 before we go onto see the test set without pca
 
-
+```python
     X_train_pca = pca.transform(X_train)
     X_test_pca = pca.transform(X_test)
-
 
     print X_train_pca.shape
     print X_test_pca.shape
@@ -349,29 +334,26 @@ before we go onto see the test set without pca
     (600, 100)
     (1800, 200)
     (600, 200)
-
+```
 
 Now lets take a look at the support vector machine to train and test
 
-
+```python
     from sklearn import svm
     clf = svm.SVC(C=5., gamma=0.001)
     clf.fit(X_train, y_train)
 
-
-
-
     SVC(C=5.0, cache_size=200, class_weight=None, coef0=0.0, degree=3,
       gamma=0.001, kernel='rbf', max_iter=-1, probability=False,
       random_state=None, shrinking=True, tol=0.001, verbose=False)
-
+```
 
 
 Produce the metrics. We can see that it has a perfect score but this not typcal
 it is just that the patterns we have choosen are quite well defined. The
 exercise is useful to see the process and measurement process.
 
-
+```python
     from sklearn import metrics
     y_pred = clf.predict(X_test)
     print(metrics.classification_report(y_test, y_pred))
@@ -384,23 +366,23 @@ exercise is useful to see the process and measurement process.
     
     avg / total       1.00      1.00      1.00       600
     
-
+```
 
 Create a random noise pattern and see if we can identify it.
 
-
+```python
     (Xprices,Yprices)=get_noise(None,None,100,0)
     d=np.array(append(Xprices,Yprices))
     prediction=clf.predict(d)
     print("Prediction(0:rising pattern,1:falling pattern,2:noise) - {0:s} expected - 2 noise".format(prediction))
 
     Prediction(0:rising pattern,1:falling pattern,2:noise) - [2] expected - 2 noise
-
+```
 
 Create a randomly shuffled test set now that we can use to develope a visual the
 pattern matching example.
 
-
+```python
     (target_test,data_test)=gen_test_samples()
     shuffle_index=np.arange(0,1000,1)
     np.random.shuffle(shuffle_index)
@@ -438,16 +420,15 @@ pattern matching example.
                 plt.plot(Xprices+(i*100),Yprices*150+1000,color='red')
     
         return correct_predictions/(end-start)
-
+```
 Visually we can pickout the patterns and noise red being the up slopes, green
 the down slopes and blue is noise.
 
-
+```python
     print("Prediction accuracy {0:f} %".format(show_prediction_example(100,150)*100))
 
     Prediction accuracy 100.000000 %
-
-
+```
 
 ![png](SimulatingPriceRecognition_files/SimulatingPriceRecognition_38_1.png)
 
