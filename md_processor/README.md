@@ -98,7 +98,7 @@ converted to csv format from the md_processor. So whart we are doing is extracti
 #### Quick Notebook example of using panadas and ploting
 
 Load the data from the csv and plot mid price with buy/sell trades
-
+```python
     %matplotlib inline
 
     import pandas as pd
@@ -124,7 +124,7 @@ Load the data from the csv and plot mid price with buy/sell trades
 
 
     <matplotlib.collections.PathCollection at 0x7677210>
-
+```
 
 ![png](images/md_example_8_1.png)
 
