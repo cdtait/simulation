@@ -8,7 +8,7 @@
  */
 class null_publisher : public md_publisher<> {
 public:
-	null_publisher(PrintType printType) {}
+	null_publisher(PrintType printType,const arguments& args) {}
 	~null_publisher() {}
 	void stop() {}
 	void offer(BookData<> && book_data){}

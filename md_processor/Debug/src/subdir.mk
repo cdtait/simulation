@@ -17,7 +17,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I"/home/obod/git/simulation/md_processor/src" -I"/home/obod/git/simulation/md_processor/src/vectorclass" -O0 -g3 -Wall -c -fmessage-length=0 -std=c++11 -fabi-version=4 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ --std=c++17 -I"/home/ctait/git/simulation/md_processor/src" -I"/home/ctait/git/simulation/md_processor/src/vectorclass" -O0 -g3 -Wall -c -fmessage-length=0 -mavx2 -mfma -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

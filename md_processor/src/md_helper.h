@@ -4,17 +4,22 @@
 #include <memory>
 
 /**
- * Missing in c++11 wait for c++14
  *
- * @param args
+ * @param n
  * @return
  */
 namespace std {
-template<typename T, typename... Args>
-	unique_ptr<T> make_unique(Args&&... args)
-	{
-		return unique_ptr<T>(new T(forward<Args>(args)...));
-	}
+    template <class T>
+    typename std::enable_if
+    <
+        std::is_array<T>::value,
+        std::unique_ptr<T>
+    >::type
+    make_unique(std::size_t n)
+    {
+        typedef typename std::remove_extent<T>::type RT;
+        return std::unique_ptr<T>(new RT[n]);
+    }
 }
 
 /**

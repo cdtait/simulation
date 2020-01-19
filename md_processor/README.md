@@ -140,7 +140,8 @@ $ Release/md_processor -p C -d M -f data/md-test-2.json 2> data/md-test.C-M.stat
 This would produce the md-test-2.C-M.csv which can be used later for analysis. The md-test.C-M.stats are a record of
 errors that if the source data/md-test-2.json was produced with deliberate or otherwise invalid data these would be 
 recorded in the stats.
-```{bash}
+
+```{python}
 $ Release/md_processor ?
 Usage: md_processor -f <file name> [-p T|C] [-d M|H|V] [-x L] [-t A|S|C] [-a F|P|ZR|ZP|ZS ] [-s P|D|N ]                    
        -f is name of file to stream the input

@@ -14,8 +14,8 @@
 #include <disruptor/event_processor.h>
 #include <disruptor/exception_handler.h>
 
+#include "arguments.h"
 #include "book_data_event.h"
-
 #include "md_publisher.h"
 
 using namespace disruptor;
@@ -36,12 +36,12 @@ using namespace disruptor;
  */
 
 // Requirement buffer as power of 2
-constexpr int buffSize=std::pow(2,18);
+ const int buffSize=std::pow<int,int>(2,18);
 
 template<int N=5>
 class disruptor_publisher : public md_publisher<N> {
 public:
-	disruptor_publisher(PrintType printType) : buffer_size(buffSize),
+	disruptor_publisher(PrintType printType,const arguments& args) : buffer_size(buffSize),
 					book_data_factory{},
 					ring_buffer(&book_data_factory, buffer_size,
 					kSingleThreadedStrategy, kBusySpinStrategy),

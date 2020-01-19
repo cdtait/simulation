@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 
-port = 8123
-mcastgroup = '225.0.0.250'
-ttl = 1 
-
 import time
 import struct
 import socket
@@ -22,14 +18,21 @@ if __name__ == '__main__':
     from optparse import OptionParser
     parser = OptionParser()
     parser.add_option("-f", "--file",action="store", type="string", dest="file")
+    parser.add_option("-p", "--port",action="store", type="int", dest="port", default=8123)
+    parser.add_option("-g", "--group",action="store", type="string", dest="mcastgroup", default="225.0.0.250")
+    parser.add_option("-t", "--ttl",action="store", type="int", dest="ttl", default=1)
+    parser.add_option("-a", "--addr",action="store", type="string", dest="addr", default="127.0.0.1")
+
     (options, args) = parser.parse_args()
 
-    addrinfo = socket.getaddrinfo(mcastgroup, None)[0]
+    addrinfo = socket.getaddrinfo(options.mcastgroup, None)[0]
 
     s = socket.socket(addrinfo[0], socket.SOCK_DGRAM)
 
+    s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_IF, socket.inet_aton(options.addr))
+
     # Set Time-to-live (optional)
-    ttl_bin = struct.pack('@i', ttl)
+    ttl_bin = struct.pack('@i', options.ttl)
     if addrinfo[0] == socket.AF_INET: # IPv4
         s.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl_bin)
     else:
@@ -37,5 +40,5 @@ if __name__ == '__main__':
 
     with open(options.file, "r") as f:
         for line in f:
-            s.sendto(line.strip(), (addrinfo[4][0], port))
+            s.sendto(line.strip(), (addrinfo[4][0], options.port))
             

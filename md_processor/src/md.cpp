@@ -40,12 +40,12 @@ PrintType char2printtype(char print_type) {
  * @return
  */
 template <typename Adapter,typename MD>
-int run_test(MD &md, Adapter &adapter, PrintType printType)
+int run_test(MD &md, Adapter &adapter, PrintType printType,const arguments& args)
 {
 	struct timeval start_time_;
 	struct timeval stop_time_;
 
-	md.start(printType);
+	md.start(printType,args);
 	adapter.wait();
 	::gettimeofday(&start_time_, NULL);
 	adapter.start(md);
@@ -66,7 +66,7 @@ int run_test(MD &md, Adapter &adapter, PrintType printType)
 
 void print_usage() {
 	std::string message =
-{R"(Usage: md_processor -f <file name> [-p T|C] [-d M|H|V] [-x L] [-t A|S|C] [-a F|P|ZR|ZP|ZS ] [-s P|D|N ]                    
+{R"(Usage: md_processor -a F -f <file name>|-a [P|ZR|ZP|ZS] [-p T|C] [-d M|H|V] [-x L] [-t A|S|C]  [-s P|D|N ]                    
        -f is name of file to stream the input
          The file name can be relative or absolute
        -p is for the type of print out put you wish to see
@@ -102,27 +102,28 @@ void print_usage() {
  * @param adapter
  */
 template <typename TokenContainer, typename Parser, typename BookContainer, typename Publisher>
-void select_adapter_and_run_test(const char * file_name,
+void select_adapter_and_run_test(const std::string& file_name,
 		md_handler<Parser,BookContainer,Publisher> &md,
 		const std::string& adapter,
-		PrintType printType) {
+		PrintType printType,
+		const arguments& args) {
 	typedef md_handler<Parser,BookContainer,Publisher> MD;
 
 	if (adapter == "F") {
-		file_adapter<TokenContainer,MD> adapter(file_name);
-		run_test(md,adapter,printType);
+		file_adapter<TokenContainer,MD> adapter(file_name.c_str());
+		run_test(md,adapter,printType,args);
 	} else if (adapter == "ZR") {
 		md_zmq_rrr_adapter<TokenContainer,MD> adapter;
-		run_test(md,adapter,printType);
+		run_test(md,adapter,printType,args);
 	} else if (adapter == "ZP") {
 		md_zmq_pull_adapter<TokenContainer,MD> adapter;
-		run_test(md,adapter,printType);
+		run_test(md,adapter,printType,args);
 	} else if (adapter == "ZS") {
 		md_zmq_sub_adapter<TokenContainer,MD> adapter;
-		run_test(md,adapter,printType);
+		run_test(md,adapter,printType,args);
 	} else if (adapter == "P") {
-		md_pcap_adapter<TokenContainer,MD> adapter(file_name);
-		run_test(md,adapter,printType);
+		md_pcap_adapter<TokenContainer,MD> adapter(file_name.c_str());
+		run_test(md,adapter,printType,args);
 	} else {
 		print_usage();
 	}
@@ -137,19 +138,20 @@ void select_adapter_and_run_test(const char * file_name,
  * @param print_type type print format type
  */
 template <typename TokenContainer, typename Publisher>
-void select_data_structure_and_run_test(char* file_name,
+void select_data_structure_and_run_test(const std::string& file_name,
 		const std::string & adapter,
 		const std::string & data_struct,
-		PrintType print_type) {
+		PrintType print_type,
+		const arguments& args) {
 	if (data_struct == "M") {
 		md_handler<list_parser, BookMap, Publisher> md_handler;
-		select_adapter_and_run_test<TokenContainer>(file_name, md_handler, adapter, print_type);
+		select_adapter_and_run_test<TokenContainer>(file_name, md_handler, adapter, print_type,args);
 	} else if (data_struct == "H") {
 		md_handler<list_parser, BookHash, Publisher> md_handler;
-		select_adapter_and_run_test<TokenContainer>(file_name, md_handler, adapter, print_type);
+		select_adapter_and_run_test<TokenContainer>(file_name, md_handler, adapter, print_type,args);
 	} else if (data_struct == "V") {
 		md_handler<list_parser, BookVector, Publisher> md_handler;
-		select_adapter_and_run_test<TokenContainer>(file_name, md_handler, adapter, print_type);
+		select_adapter_and_run_test<TokenContainer>(file_name, md_handler, adapter, print_type,args);
 	} else {
 		print_usage();
 	}
@@ -166,13 +168,14 @@ void select_data_structure_and_run_test(char* file_name,
  * @param print_type type print format type
  */
 template <typename TokenContainer,typename Publisher>
-void select_parser_and_run_test(char* file_name,
+void select_parser_and_run_test(const std::string& file_name,
 		const std::string adapter,
 		const std::string data_struct,
 		const std::string parser,
-		PrintType print_type) {
+		PrintType print_type,
+		const arguments& args) {
 	if (parser == "L") {
-		select_data_structure_and_run_test<TokenContainer,Publisher>(file_name,adapter,data_struct,print_type);
+		select_data_structure_and_run_test<TokenContainer,Publisher>(file_name,adapter,data_struct,print_type,args);
 	}
 	// Other parser specific to the shape of the data
 	else {
@@ -191,24 +194,25 @@ void select_parser_and_run_test(char* file_name,
  * @param print_type type print format type
  */
 template <typename Publisher>
-void select_token_method_and_run_test(char* file_name,
+void select_token_method_and_run_test(const std::string& file_name,
 		const std::string& adapter,
 		const std::string&  data_struct,
 		const std::string&  parser,
 		const std::string&  tokenizer,
-		PrintType print_type) {
+		PrintType print_type,
+		const arguments& args) {
 	// Allows a comparison between different tokenization techniques
 	if (tokenizer=="A") {
 		// Tokenized simple csv json array
-		select_parser_and_run_test<json_token_array,Publisher>(file_name,adapter,data_struct,parser,print_type);
+		select_parser_and_run_test<json_token_array,Publisher>(file_name,adapter,data_struct,parser,print_type,args);
 	}
 	else if(tokenizer=="S") {
 		// Tokenized csv std::string vector
-		select_parser_and_run_test<string_token_vector,Publisher>(file_name,adapter,data_struct,parser,print_type);
+		select_parser_and_run_test<string_token_vector,Publisher>(file_name,adapter,data_struct,parser,print_type,args);
 	}
 	else if(tokenizer=="C") {
 		// Tokenized csv char * vector
-		select_parser_and_run_test<char_token_vector,Publisher>(file_name,adapter,data_struct,parser,print_type);
+		select_parser_and_run_test<char_token_vector,Publisher>(file_name,adapter,data_struct,parser,print_type,args);
 	}
 	else {
 		print_usage();
@@ -227,25 +231,30 @@ void select_token_method_and_run_test(char* file_name,
  * @param publisher the pusher type
  * @param print_type type print format type
  */
-void select_publisher_and_run_test(char* file_name,
+void select_publisher_and_run_test(const std::string& file_name,
 		const std::string& adapter,
 		const std::string&  data_struct,
 		const std::string&  parser,
 		const std::string&  tokenizer,
 		const std::string& publisher,
-		PrintType print_type) {
+		PrintType print_type,
+		const arguments& args) {
 	// Allows a comparison between different tokenization techniques
 	if (publisher=="D") {
 		// Tokenized simple csv json array
-		select_token_method_and_run_test<disruptor_publisher<>>(file_name,adapter,data_struct,parser,tokenizer,print_type);
+		select_token_method_and_run_test<disruptor_publisher<>>(file_name,adapter,data_struct,parser,tokenizer,print_type,args);
+	}
+	else if(publisher=="U") {
+		// Tokenized csv char * vector
+		select_token_method_and_run_test<udp_publisher<>>(file_name,adapter,data_struct,parser,tokenizer,print_type,args);
 	}
 	else if(publisher=="P") {
 		// Tokenized csv std::string vector
-		select_token_method_and_run_test<print_publisher<>>(file_name,adapter,data_struct,parser,tokenizer,print_type);
+		select_token_method_and_run_test<print_publisher<>>(file_name,adapter,data_struct,parser,tokenizer,print_type,args);
 	}
 	else if(publisher=="N") {
 		// Tokenized csv char * vector
-		select_token_method_and_run_test<null_publisher>(file_name,adapter,data_struct,parser,tokenizer,print_type);
+		select_token_method_and_run_test<null_publisher>(file_name,adapter,data_struct,parser,tokenizer,print_type,args);
 	}
 	else {
 		print_usage();
@@ -262,19 +271,11 @@ void select_publisher_and_run_test(char* file_name,
  * @return
  */
 int main(int argc, char **argv) {
+	/*
 	int option = 0;
-	PrintType print_type = PrintType::Trading;
-	std::string data_struct = "M";
-	std::string parser = "L";
-	std::string tokenizer = "A";
-	std::string adapter = "F";
-	std::string publisher = "P";
-
-	char * file_name=nullptr;
 
 	while ((option = getopt(argc, argv, "h?f:p:d:x:t:a:s:")) != -1) {
 		switch (option) {
-		std::cout << option << std::endl;
 		case '?':
 		case 'h':
 			print_usage();
@@ -305,9 +306,20 @@ int main(int argc, char **argv) {
 			exit(EXIT_FAILURE);
 		}
 	}
+	*/
+
+    arguments args( argc, argv);
+
+    std::string file_name = args.get_opt<std::string>("f", optional_arg, has_arg);
+    PrintType print_type = char2printtype(args.get_opt<char>("p", optional_arg, has_arg, (char)PrintType::Trading));
+	std::string data_struct = args.get_opt<std::string>("d", optional_arg, has_arg, "M");
+	std::string parser = args.get_opt<std::string>("x", optional_arg, has_arg, "L");
+	std::string tokenizer = args.get_opt<std::string>("t", optional_arg, has_arg, "A");
+	std::string adapter = args.get_opt<std::string>("a", optional_arg, has_arg, "F");
+	std::string publisher = args.get_opt<std::string>("s", optional_arg, has_arg, "P");
 
 	// Check if we need a file name
-	if (!file_name) {
+	if (file_name.empty()) {
 		// If we are using zero mq we don't need a filename or device name
 		if (adapter[0] != 'Z') {
 			printf("No file input\n");
@@ -337,7 +349,7 @@ int main(int argc, char **argv) {
 	}
 
 	// Start the test by configuring the options then passing it on to run_test
-	select_publisher_and_run_test(file_name,adapter,data_struct,parser,tokenizer,publisher,print_type);
+	select_publisher_and_run_test(file_name,adapter,data_struct,parser,tokenizer,publisher,print_type,args);
 
 	return 0;
 }

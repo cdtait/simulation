@@ -139,7 +139,7 @@ void print_trade_txt(std::ostream & ostr,BookData<n> && book) {
 
 	::snprintf(buffer,buff_len,readable_trade_format,
 			book.total_traded_quantity.quantity,book.total_traded_quantity.price,
-			book.last_trade.side,book.last_trade.quantity,book.last_trade.price);
+			(char)book.last_trade.side,book.last_trade.quantity,book.last_trade.price);
 
 	ostr << buffer;
 }
@@ -167,7 +167,7 @@ void print_trade_csv(std::ostream & ostr,BookData<n> && book) {
 	char buffer[buff_len];
 
 	::snprintf(buffer,buff_len,csv_trade_format,
-			book.last_trade.side,book.last_trade.quantity,book.last_trade.price);
+			(char)book.last_trade.side,book.last_trade.quantity,book.last_trade.price);
 
 	ostr << buffer;
 	print_book_csv_base(ostr,std::forward<BookData<n>>(book));

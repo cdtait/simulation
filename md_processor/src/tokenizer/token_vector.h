@@ -51,8 +51,9 @@ struct token_vector
          	return current == rhs.current;
          }
 
+         // TODO, not sure why I did this?
          bool operator!=(const iterator& rhs) const {
-         	return (current < rhs.current) ? -1 : (rhs.current < current) ? +1 : 0;
+         	return not (((current < rhs.current) ? -1 : (rhs.current < current) ? +1 : 0) == 0);
          }
 
          iterator& operator ++()

@@ -41,14 +41,18 @@ public:
 	void wait() {
 		// Receive the first message
         zmq::message_t message;
-        m_subscriber.recv(&message);
-    	numMessages = std::stoi(std::string(static_cast<char*>(message.data()), message.size()),nullptr);
+        zmq::detail::recv_result_t r = m_subscriber.recv(message);
+    	numMessages = 0;
+        if (r) {
+			numMessages = std::stoi(std::string(static_cast<char*>(message.data()), message.size()),nullptr);
+			// Ack the first message
+			std::string nm=std::to_string(numMessages);
+			//zmq::message_t nmreply(nm.size());
+			//::memcpy (nmreply.data(),nm.data(),nm.size());
+			//m_subscriber.send (nmreply);
+			m_subscriber.send (zmq::const_buffer(nm.data(),nm.size()));
+        }
 
-    	// Ack the first message
-    	std::string nm=std::to_string(numMessages);
-	    zmq::message_t nmreply(nm.size());
-	    ::memcpy (nmreply.data(),nm.data(),nm.size());
-	    m_subscriber.send (nmreply);
 	}
 
 	/**
@@ -62,13 +66,15 @@ public:
 
        	stopped=false;
     	while(!stopped && counter<numMessages) {
-    		try
+		try
     		{
-    			// Receive a message and process
-    			m_subscriber.recv(&update);
+			// Receive a message and process
+		        zmq::detail::recv_result_t r = m_subscriber.recv(update);
     			// TODO this shouldn't be a string, but a byte stream (nasty cast here!!)
-    			line=std::string(static_cast<char*>(update.data()), update.size());
-    			md.process_message(get_tokens<TokenContainer>(line));
+ 			if (r) {
+    				line=std::string(static_cast<char*>(update.data()), update.size());
+    				md.process_message(get_tokens<TokenContainer>(line));
+			}
     		}
     		catch(std::exception const& e)
     		{
@@ -77,9 +83,9 @@ public:
     		counter++;
     		// Ack this message
     		countStr=std::to_string(counter);
-    		zmq::message_t reply (countStr.size());
-    		::memcpy(reply.data(),countStr.data(),countStr.size());
-    	    m_subscriber.send (reply);
+    		//zmq::message_t reply (countStr.size());
+    		//::memcpy(reply.data(),countStr.data(),countStr.size());
+    		m_subscriber.send (zmq::const_buffer(countStr.data(),countStr.size()));
     	}
     }
 
@@ -127,8 +133,10 @@ public:
 	 */
 	void wait() {
         zmq::message_t message;
-        m_subscriber.recv(&message);
-    	numMessages = std::stoi(std::string(static_cast<char*>(message.data()), message.size()),nullptr);
+        zmq::detail::recv_result_t r = m_subscriber.recv(message);
+        numMessages = 0;
+        if (r)
+        	numMessages = std::stoi(std::string(static_cast<char*>(message.data()), message.size()),nullptr);
 	}
 
 	/**
@@ -144,9 +152,11 @@ public:
     		try
     		{
     			// TODO this shouldn't be a string, but a byte stream (nasty cast here!!)
-    			m_subscriber.recv(&update);
-    			line=std::string(static_cast<char*>(update.data()), update.size());
-    			md.process_message(get_tokens<TokenContainer>(line));
+    			zmq::detail::recv_result_t r = m_subscriber.recv(update);
+    			if (r) {
+    				line=std::string(static_cast<char*>(update.data()), update.size());
+    				md.process_message(get_tokens<TokenContainer>(line));
+    			}
     		}
     		catch(std::exception const& e)
     		{
@@ -194,8 +204,11 @@ public:
 	 */
 	void wait() {
         zmq::message_t message;
-        m_subscriber.recv(&message);
-    	numMessages = std::stoi(std::string(static_cast<char*>(message.data()), message.size()),nullptr);
+        zmq::detail::recv_result_t r = m_subscriber.recv(message);
+        numMessages = 0;
+        if (r) {
+        	numMessages = std::stoi(std::string(static_cast<char*>(message.data()), message.size()),nullptr);
+        }
 	}
 
 	/**
@@ -211,11 +224,13 @@ public:
     	while(!stopped && counter<numMessages) {
     		try
     		{
-    			// Receieve and process data message
-    			m_subscriber.recv(&update);
-    			// TODO this shouldn't be a string, but a byte stream (nasty cast here!!)
-    			line=std::string(static_cast<char*>(update.data()), update.size());
-    			md.process_message(get_tokens<TokenContainer>(line));
+    			// Receive and process data message
+    	        zmq::detail::recv_result_t r = m_subscriber.recv(update);
+    	        if (r) {
+    	        	// TODO this shouldn't be a string, but a byte stream (nasty cast here!!)
+    	        	line=std::string(static_cast<char*>(update.data()), update.size());
+    	        	md.process_message(get_tokens<TokenContainer>(line));
+    	        }
     		}
     		catch(std::exception const& e)
     		{

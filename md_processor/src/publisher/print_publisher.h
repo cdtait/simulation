@@ -3,6 +3,7 @@
 
 #include "md_publisher.h"
 #include "md_types.h"
+#include "arguments.h"
 
 /**
  * @brief .
@@ -12,7 +13,7 @@
 template<int N=5>
 class print_publisher : public md_publisher<N> {
 public:
-	print_publisher(PrintType printType)
+	print_publisher(PrintType printType,const arguments& args)
 	{
 		if (printType==PrintType::Trading) {
 			print_trade_f=print_trade_txt<N>;

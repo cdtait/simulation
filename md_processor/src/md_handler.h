@@ -8,6 +8,7 @@
 #include "md_parsers.h"
 #include "md_order_book.h"
 #include "md_publishers.h"
+#include "arguments.h"
 
 /**
    *  @brief Implementation of the md handler
@@ -23,8 +24,8 @@ public:
         publisher->stop();
     }
 
-    void start(PrintType printType) {
-    	publisher=std::make_unique<Publisher>(printType);
+    void start(PrintType printType, const arguments& args) {
+    	publisher=std::make_unique<Publisher>(printType,args);
     }
 
     /**
