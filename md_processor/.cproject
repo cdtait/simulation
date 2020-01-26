@@ -54,10 +54,16 @@
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src}&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/src/vectorclass}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value=""/>
                                     								
                                 </option>
                                 								
-                                <option id="gnu.cpp.compiler.option.preprocessor.def.451081216" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false"/>
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.451081216" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+                                    									
+                                    <listOptionValue builtIn="false" value="LOG4CXX_PATH=\&quot;resources/xml/udp_publisher.log4cxx.xml\&quot;"/>
+                                    								
+                                </option>
                                 								
                                 <option id="gnu.cpp.compiler.option.dialect.std.991869695" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
                                 								
@@ -115,7 +121,7 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="version2/instrset_detect.cpp|version2/dispatch_example.cpp|zmq|json_spirit|SuperEasyJSON|disruptor|strtk|vectorclass|vectorclass/myfile.cpp|vectorclass/instrset_detect.cpp|vectorclass/dispatch_example.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        <entry excluding="md.cpp|mio|version2/instrset_detect.cpp|version2/dispatch_example.cpp|zmq|json_spirit|SuperEasyJSON|disruptor|strtk|vectorclass|vectorclass/myfile.cpp|vectorclass/instrset_detect.cpp|vectorclass/dispatch_example.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
                         					
                     </sourceEntries>
                     				
@@ -181,7 +187,11 @@
                                     								
                                 </option>
                                 								
-                                <option id="gnu.cpp.compiler.option.preprocessor.def.156745921" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false"/>
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.156745921" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+                                    									
+                                    <listOptionValue builtIn="false" value="LOG4CXX_PATH=\&quot;resources/xml/udp_publisher.log4cxx.xml\&quot;"/>
+                                    								
+                                </option>
                                 								
                                 <option id="gnu.cpp.compiler.option.dialect.std.1201820905" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
                                 								
@@ -239,7 +249,7 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="version2/instrset_detect.cpp|version2/dispatch_example.cpp|zmq|json_spirit|SuperEasyJSON|disruptor|strtk|vectorclass|vectorclass/myfile.cpp|vectorclass/instrset_detect.cpp|vectorclass/dispatch_example.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        <entry excluding="md.cpp|mio|version2/instrset_detect.cpp|version2/dispatch_example.cpp|zmq|json_spirit|SuperEasyJSON|disruptor|strtk|vectorclass|vectorclass/myfile.cpp|vectorclass/instrset_detect.cpp|vectorclass/dispatch_example.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
                         					
                     </sourceEntries>
                     				

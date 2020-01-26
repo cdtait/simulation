@@ -21,11 +21,15 @@ template <typename Parser=list_parser, typename BookContainer=BookMap,typename P
 class md_handler {
 public:
     void stop() {
-        publisher->stop();
+    	if (publisher.get()) {
+    		publisher->stop();
+    	}
     }
 
     void start(PrintType printType, const arguments& args) {
-    	publisher=std::make_unique<Publisher>(printType,args);
+    	if (not std::is_same<null_publisher, Publisher>::value) {
+    		publisher=std::make_unique<Publisher>(printType,args);
+    	}
     }
 
     /**
